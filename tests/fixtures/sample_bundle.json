@@ -1,0 +1,166 @@
+{
+  "type": "bundle",
+  "id": "bundle--dfe53ef7-240f-4a4c-9a6d-6cb29f629a56",
+  "objects": [
+    {
+      "type": "threat-actor",
+      "spec_version": "2.1",
+      "id": "threat-actor--04f69fa3-0776-43ae-a37b-f37917028fb7",
+      "created": "2025-01-01T00:00:00Z",
+      "modified": "2025-06-01T00:00:00Z",
+      "name": "Test APT Group",
+      "aliases": ["TestGroup", "TG-001"],
+      "sophistication": "advanced",
+      "primary_motivation": "espionage",
+      "labels": ["apt", "espionage", "targets-japan"],
+      "first_seen": "2024-01-01T00:00:00Z",
+      "last_seen": "2025-06-01T00:00:00Z",
+      "threat_actor_types": ["nation-state"]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--15bd181c-f405-44bf-a8af-c77dd8538ccb",
+      "created": "2025-01-01T00:00:00Z",
+      "modified": "2025-03-01T00:00:00Z",
+      "name": "Spearphishing Attachment",
+      "description": "Adversaries send spearphishing emails with a malicious attachment.",
+      "external_references": [
+        {
+          "source_name": "mitre-attack",
+          "external_id": "T1566.001",
+          "url": "https://attack.mitre.org/techniques/T1566/001"
+        }
+      ],
+      "kill_chain_phases": [
+        {
+          "kill_chain_name": "mitre-attack",
+          "phase_name": "initial-access"
+        }
+      ],
+      "x_mitre_platforms": ["Windows", "macOS", "Linux"]
+    },
+    {
+      "type": "attack-pattern",
+      "spec_version": "2.1",
+      "id": "attack-pattern--0592a0fe-cb08-4448-96a5-733186a68637",
+      "created": "2025-01-01T00:00:00Z",
+      "modified": "2025-03-01T00:00:00Z",
+      "name": "Command and Scripting Interpreter",
+      "external_references": [
+        {
+          "source_name": "mitre-attack",
+          "external_id": "T1059"
+        }
+      ],
+      "kill_chain_phases": [
+        {
+          "kill_chain_name": "mitre-attack",
+          "phase_name": "execution"
+        }
+      ]
+    },
+    {
+      "type": "vulnerability",
+      "spec_version": "2.1",
+      "id": "vulnerability--5ca55dce-7964-4100-bc5e-89c143cc144e",
+      "created": "2025-02-01T00:00:00Z",
+      "modified": "2025-02-01T00:00:00Z",
+      "name": "CVE-2025-12345",
+      "description": "A test vulnerability.",
+      "external_references": [
+        {
+          "source_name": "cve",
+          "external_id": "CVE-2025-12345",
+          "x_cvss": {"base_score": 9.8}
+        }
+      ]
+    },
+    {
+      "type": "malware",
+      "spec_version": "2.1",
+      "id": "malware--880bcbeb-5d80-4793-b34f-639c858a8c5e",
+      "created": "2025-01-01T00:00:00Z",
+      "modified": "2025-04-01T00:00:00Z",
+      "name": "TestRAT",
+      "is_family": true,
+      "malware_types": ["remote-access-trojan"],
+      "description": "A test remote access trojan.",
+      "capabilities": ["remote-access", "data-exfiltration"]
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--54308dda-3c7d-409c-824c-b6b664511e4e",
+      "created": "2025-01-01T00:00:00Z",
+      "modified": "2025-05-01T00:00:00Z",
+      "name": "Malicious IP",
+      "pattern": "[ipv4-addr:value = '192.0.2.1']",
+      "pattern_type": "stix",
+      "valid_from": "2025-01-01T00:00:00Z",
+      "confidence": 85,
+      "object_marking_refs": [
+        "marking-definition--613f2e26-407d-48c7-9eca-b8e91df99dc9"
+      ]
+    },
+    {
+      "type": "indicator",
+      "spec_version": "2.1",
+      "id": "indicator--8c6fd3a2-ad23-4a3f-936b-d3f58804f2f4",
+      "created": "2025-01-01T00:00:00Z",
+      "modified": "2025-05-01T00:00:00Z",
+      "name": "TLP:RED indicator",
+      "pattern": "[ipv4-addr:value = '198.51.100.1']",
+      "pattern_type": "stix",
+      "valid_from": "2025-01-01T00:00:00Z",
+      "object_marking_refs": [
+        "marking-definition--5e57c739-391a-4eb3-b6be-7d15ca92d5ed"
+      ]
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--c504e532-33bc-44f0-bdc2-557160d1022b",
+      "created": "2025-01-01T00:00:00Z",
+      "modified": "2025-01-01T00:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "threat-actor--04f69fa3-0776-43ae-a37b-f37917028fb7",
+      "target_ref": "attack-pattern--15bd181c-f405-44bf-a8af-c77dd8538ccb",
+      "confidence": 90,
+      "start_time": "2024-06-01T00:00:00Z",
+      "stop_time": "2025-06-01T00:00:00Z"
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--d69bcef9-2472-40d8-934e-9bdb53d81976",
+      "created": "2025-01-01T00:00:00Z",
+      "modified": "2025-01-01T00:00:00Z",
+      "relationship_type": "uses",
+      "source_ref": "threat-actor--04f69fa3-0776-43ae-a37b-f37917028fb7",
+      "target_ref": "attack-pattern--0592a0fe-cb08-4448-96a5-733186a68637",
+      "confidence": 80
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--bfbe6bde-a37a-41ca-aa8f-3062010c49d5",
+      "created": "2025-01-01T00:00:00Z",
+      "modified": "2025-01-01T00:00:00Z",
+      "relationship_type": "exploits",
+      "source_ref": "attack-pattern--15bd181c-f405-44bf-a8af-c77dd8538ccb",
+      "target_ref": "vulnerability--5ca55dce-7964-4100-bc5e-89c143cc144e"
+    },
+    {
+      "type": "relationship",
+      "spec_version": "2.1",
+      "id": "relationship--87af3d61-1259-4c7f-86bd-d581749158b8",
+      "created": "2025-01-01T00:00:00Z",
+      "modified": "2025-01-01T00:00:00Z",
+      "relationship_type": "indicates",
+      "source_ref": "indicator--54308dda-3c7d-409c-824c-b6b664511e4e",
+      "target_ref": "threat-actor--04f69fa3-0776-43ae-a37b-f37917028fb7",
+      "confidence": 75
+    }
+  ]
+}

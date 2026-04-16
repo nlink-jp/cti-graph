@@ -10,7 +10,7 @@ import tomllib
 from pathlib import Path
 from typing import Any
 
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel
 
 _TOOL_NAME = "cti-graph"
 _ENV_PREFIX = "CTI_GRAPH_"

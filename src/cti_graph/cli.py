@@ -106,6 +106,11 @@ def etl(ctx: click.Context, bundle: Path | None, pir_path: Path | None) -> None:
 @click.pass_context
 def serve(ctx: click.Context) -> None:
     """Start the analysis API server."""
+    import uvicorn
+
+    from cti_graph.api.app import create_app
+
     cfg = ctx.obj["config"]
-    click.echo(f"API server: {cfg.api.host}:{cfg.api.port}")
-    click.echo("API server not yet implemented (Phase 3)")
+    application = create_app(cfg)
+    click.echo(f"Starting API server on {cfg.api.host}:{cfg.api.port}")
+    uvicorn.run(application, host=cfg.api.host, port=cfg.api.port)

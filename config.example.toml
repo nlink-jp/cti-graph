@@ -1,0 +1,28 @@
+[database]
+path = ""  # default: ~/.local/share/cti-graph/graph.db
+
+[stix]
+landing_dir = ""  # default: ~/.local/share/cti-graph/stix/
+tlp_max     = "amber"  # red objects are never stored
+
+[opencti]
+url       = ""
+token_env = "OPENCTI_TOKEN"
+
+[caldera]
+url         = ""
+api_key_env = "CALDERA_API_KEY"
+
+[notification]
+slack_webhook_env     = "SLACK_WEBHOOK_URL"
+choke_point_threshold = 0.1  # notify when score changes > 10%
+
+[github]
+host      = ""
+token_env = "GITHUB_TOKEN"
+repo      = ""
+
+[api]
+host      = "127.0.0.1"
+port      = 8080
+token_env = "CTI_GRAPH_API_TOKEN"

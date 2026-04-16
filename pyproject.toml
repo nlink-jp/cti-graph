@@ -1,0 +1,55 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cti-graph"
+version = "0.1.0"
+description = "Local-first threat intelligence attack graph analysis platform"
+requires-python = ">=3.12"
+license = "Apache-2.0"
+dependencies = [
+    "click>=8.1,<9.0",
+    "pydantic>=2.0,<3.0",
+    "httpx>=0.27,<1.0",
+    "fastapi>=0.115,<1.0",
+    "uvicorn[standard]>=0.34,<1.0",
+    "stix2>=3.0,<4.0",
+    "pycti>=6.3,<7.0",
+    "structlog>=24.4,<26.0",
+]
+
+[project.scripts]
+cti-graph = "cti_graph.cli:main"
+
+[project.urls]
+Repository = "https://github.com/nlink-jp/cti-graph"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=6.0",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.8",
+    "pyright>=1.1",
+    "respx>=0.22",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cti_graph"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "basic"
+pythonPlatform = "All"

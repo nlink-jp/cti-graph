@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.1] - 2026-04-16
+
+### Added
+- Architecture guide, PIR JSON schema spec, API reference (docs/en + docs/ja)
+- Project-level CLAUDE.md with STIX UUID, TLP marking ID, and design rules
+- Caldera TTP→Ability mapping via Ability API (`fetch_ability_map`, `resolve_ability_ids`)
+- 5 new tests (total: 124)
+
 ## [0.1.0] - 2026-04-16
 
 ### Added

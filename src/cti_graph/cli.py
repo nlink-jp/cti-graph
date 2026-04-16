@@ -55,21 +55,51 @@ def init_db(ctx: click.Context) -> None:
     default=None,
     help="Path to a single STIX bundle JSON file",
 )
+@click.option(
+    "--pir",
+    "pir_path",
+    type=click.Path(exists=True, path_type=Path),
+    default=None,
+    help="Path to PIR JSON file",
+)
 @click.pass_context
-def etl(ctx: click.Context, bundle: Path | None) -> None:
+def etl(ctx: click.Context, bundle: Path | None, pir_path: Path | None) -> None:
     """Run the ETL pipeline to ingest STIX data."""
+    from cti_graph.etl.worker import ETLWorker
+    from cti_graph.pir.filter import PIRFilter
+    from cti_graph.stix.parser import load_bundle_from_file, load_bundles_from_dir
+
     cfg = ctx.obj["config"]
 
-    if bundle:
-        source = bundle
+    # Load PIR
+    if pir_path:
+        pir_filter = PIRFilter.from_file(pir_path)
     else:
-        source = cfg.stix_dir
-        if not source.is_dir():
-            click.echo(f"STIX landing directory not found: {source}", err=True)
-            raise SystemExit(1)
+        pir_filter = PIRFilter.empty()
 
-    click.echo(f"ETL source: {source}")
-    click.echo("ETL pipeline not yet implemented (Phase 2)")
+    # Load STIX objects
+    if bundle:
+        objects = load_bundle_from_file(bundle)
+    else:
+        stix_dir = cfg.stix_dir
+        if not stix_dir.is_dir():
+            click.echo(f"STIX landing directory not found: {stix_dir}", err=True)
+            raise SystemExit(1)
+        objects = load_bundles_from_dir(stix_dir, tlp_max=cfg.stix.tlp_max)
+
+    if not objects:
+        click.echo("No STIX objects to process.")
+        return
+
+    # Run ETL
+    repo = SQLiteRepository(cfg.db_path)
+    try:
+        repo.init_schema()
+        worker = ETLWorker(repo, pir_filter, tlp_max_level=cfg.stix.tlp_max)
+        stats = worker.process_bundle(objects)
+        click.echo(f"ETL complete: {stats}")
+    finally:
+        repo.close()
 
 
 @main.command()

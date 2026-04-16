@@ -5,7 +5,13 @@ from __future__ import annotations
 import httpx
 import respx
 
-from cti_graph.caldera.client import create_adversary, get_adversaries, sync_actor_ttps
+from cti_graph.caldera.client import (
+    create_adversary,
+    fetch_ability_map,
+    get_adversaries,
+    resolve_ability_ids,
+    sync_actor_ttps,
+)
 from cti_graph.notify.slack import _detect_changes, notify_etl_complete
 
 # ---------------------------------------------------------------------------
@@ -41,9 +47,63 @@ class TestCalderaCreateAdversary:
         assert result["adversary_id"] == "new-1"
 
 
+class TestCalderaFetchAbilityMap:
+    @respx.mock
+    def test_builds_map(self):
+        respx.get("http://caldera.test/api/v2/abilities").mock(
+            return_value=httpx.Response(
+                200,
+                json=[
+                    {"ability_id": "ab-1", "technique_id": "T1566.001"},
+                    {"ability_id": "ab-2", "technique_id": "T1566.001"},
+                    {"ability_id": "ab-3", "technique_id": "T1059"},
+                ],
+            )
+        )
+        mapping = fetch_ability_map("http://caldera.test", "key")
+        assert len(mapping["T1566.001"]) == 2
+        assert mapping["T1059"] == ["ab-3"]
+
+    @respx.mock
+    def test_handles_failure(self):
+        respx.get("http://caldera.test/api/v2/abilities").mock(return_value=httpx.Response(500))
+        mapping = fetch_ability_map("http://caldera.test", "key")
+        assert mapping == {}
+
+
+class TestResolveAbilityIds:
+    def test_resolves_via_map(self):
+        ttp_rows = [{"src_ttp_stix_id": "ttp-1", "dst_ttp_stix_id": "ttp-2"}]
+        # Simulate repo lookup via a simple mock
+        ability_map = {"T1566.001": ["ab-1"], "T1059": ["ab-3"]}
+
+        class FakeRepo:
+            def query(self, sql, params):
+                lookup = {"ttp-1": "T1566.001", "ttp-2": "T1059"}
+                tech = lookup.get(params["stix_id"])
+                return [{"attack_technique_id": tech}] if tech else []
+
+        ids = resolve_ability_ids(ttp_rows, ability_map, repo=FakeRepo())
+        assert ids == ["ab-1", "ab-3"]
+
+    def test_unresolved_ttps(self):
+        ttp_rows = [{"src_ttp_stix_id": "ttp-1", "dst_ttp_stix_id": "ttp-2"}]
+        ids = resolve_ability_ids(ttp_rows, {})  # no map, no repo
+        assert ids == []
+
+    def test_no_repo_no_resolution(self):
+        ttp_rows = [{"src_ttp_stix_id": "ttp-1", "dst_ttp_stix_id": "ttp-2"}]
+        ability_map = {"T1566.001": ["ab-1"]}
+        ids = resolve_ability_ids(ttp_rows, ability_map, repo=None)
+        assert ids == []  # can't look up technique IDs without repo
+
+
 class TestCalderaSyncActorTTPs:
     @respx.mock
-    def test_create_new(self):
+    def test_create_new_with_ability_mapping(self):
+        respx.get("http://caldera.test/api/v2/abilities").mock(
+            return_value=httpx.Response(200, json=[])  # no abilities -> fallback
+        )
         respx.get("http://caldera.test/api/v2/adversaries").mock(return_value=httpx.Response(200, json=[]))
         respx.post("http://caldera.test/api/v2/adversaries").mock(
             return_value=httpx.Response(200, json={"adversary_id": "new-1"})
@@ -55,10 +115,11 @@ class TestCalderaSyncActorTTPs:
         ]
         result = sync_actor_ttps("http://caldera.test", "key", "actor-1", ttp_rows)
         assert result["action"] == "created"
-        assert result["ability_count"] == 3
+        assert result["ability_count"] == 3  # fallback to STIX IDs
 
     @respx.mock
     def test_update_existing(self):
+        respx.get("http://caldera.test/api/v2/abilities").mock(return_value=httpx.Response(200, json=[]))
         respx.get("http://caldera.test/api/v2/adversaries").mock(
             return_value=httpx.Response(200, json=[{"name": "cti-graph-actor-1", "adversary_id": "adv-1"}])
         )
